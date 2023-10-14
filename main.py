@@ -63,6 +63,7 @@ class StudyTimer:
             self.timer_label.config(text="{:02d}:{:02d}:{:02d}".format(hours, mins, seconds))
             self.master.after(1000, self.update_timer)
 
-root = tk.Tk()
-study_timer = StudyTimer(root)
-root.mainloop()
+if __name__ == '__main__':
+    root = tk.Tk()
+    study_timer = StudyTimer(root)
+    root.mainloop()
