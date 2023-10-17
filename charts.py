@@ -59,7 +59,7 @@ class HabitTracker(QWidget):
             #vx = QVBoxLayout()
             self.vx.append(QVBoxLayout())
             day = QDate(now.year, now.month, i)
-            day_label = QLabel(str(i)+"|"+day.toString("ddd")[0])
+            day_label = QLabel(str(i))#+"|"+day.toString("ddd")[0])
             self.vx[-1].addWidget(day_label)
             for habit in self.habits:
                 self.vx[-1].addWidget(self.to_square(habit['days'][str(i)],i,habit['name']))
@@ -96,7 +96,7 @@ class HabitTracker(QWidget):
             self.habits.append({"name": habit_name, "days": d})
             self.habit_input.clear()
             self.save_habits()
-        self.resize_ui(self.habits[-1]['name'],self.habits[-1]['days'])
+            self.resize_ui(self.habits[-1]['name'],self.habits[-1]['days'])
 
     def save_habits(self):
         with open("habits.json", "w") as f:
