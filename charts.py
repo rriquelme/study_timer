@@ -21,8 +21,8 @@ class HabitTracker(QWidget):
         #self.setLayout(self.hrows)
         # First will be the header for the habits
         # Create a new row for the button and habit input
-        self.refresh_gui()
-        self.refresh_gui()
+        self.create_ui()
+        #self.create_ui()
         button_row = QHBoxLayout()
         self.habit_input = QLineEdit()
         button_row.addWidget(self.habit_input)
@@ -38,37 +38,42 @@ class HabitTracker(QWidget):
         self.setLayout(main_layout)
 
 
-    def refresh_gui(self):
+    def create_ui(self):
+        #self.hrows = QHBoxLayout()
         self.load_habits()
         now = datetime.datetime.now()
         len_month = calendar.monthrange(now.year, now.month)[1]
-        v0 = QVBoxLayout()
+        self.v0 = QVBoxLayout()
         day_label = QLabel("Habits:")
-        v0.addWidget(day_label)
+        day_label.setAlignment(Qt.AlignVCenter)
+        self.v0.addWidget(day_label)
         for habit in self.habits:
             day_label = QLabel(habit['name'])
-            v0.addWidget(day_label)
-        self.hrows.addLayout(v0)
+            day_label.setAlignment(Qt.AlignVCenter)
+            self.v0.addWidget(day_label)
+        self.hrows.addLayout(self.v0)
         
         # Then the days of the month
+        self.vx = []
         for i in range(1, len_month+1):
-            vx = QVBoxLayout()
-            day_label = QLabel(str(i))
-            vx.addWidget(day_label)
+            #vx = QVBoxLayout()
+            self.vx.append(QVBoxLayout())
+            day = QDate(now.year, now.month, i)
+            day_label = QLabel(str(i)+"|"+day.toString("ddd")[0])
+            self.vx[-1].addWidget(day_label)
             for habit in self.habits:
-                vx.addWidget(self.to_square(habit['days'],i))
-            self.hrows.addLayout(vx)
+                self.vx[-1].addWidget(self.to_square(habit['days'][str(i)],i,habit['name']))
+            self.hrows.addLayout(self.vx[-1])
 
+    def resize_ui(self,habit_name, days):
+        self.v0.addWidget(QLabel(habit_name))
+        for x in range(1, len(self.vx)+1):
+            #print("---",days[1])
+            self.vx[x-1].addWidget(self.to_square(days[x],x,habit_name))
 
-
-            #day_label = QLabel(str(i))
-            #hrows.addWidget(day_label)
-
-
-        
-    def to_square(self, color,ndate):
+    def to_square(self, color,ndate,habit_name):
         day = QDate(2023, 10, ndate)
-        square = Square(day)
+        square = Square(day,habit_name)
         if color == "green":
             square.color = Qt.green
         else:
@@ -91,7 +96,7 @@ class HabitTracker(QWidget):
             self.habits.append({"name": habit_name, "days": d})
             self.habit_input.clear()
             self.save_habits()
-        self.refresh_gui()
+        self.resize_ui(self.habits[-1]['name'],self.habits[-1]['days'])
 
     def save_habits(self):
         with open("habits.json", "w") as f:
@@ -108,13 +113,14 @@ class HabitTracker(QWidget):
         self.save_habits()
 
 class Square(QWidget):
-    def __init__(self, day):
+    def __init__(self, day,habit_name):
         super().__init__()
         self.day = day
-        if datetime.datetime.today().day == self.day.day():
-            self.color = Qt.yellow
-        else:
-            self.color = Qt.white
+        self.habit_name = habit_name
+        #if datetime.datetime.today().day == self.day.day():
+        #    self.color = Qt.yellow
+        #else:
+        #    self.color = Qt.white
         self.setMinimumSize(QSize(20, 20))
         self.setMaximumSize(QSize(20, 20))
 
@@ -126,7 +132,14 @@ class Square(QWidget):
     def mousePressEvent(self, event):
         if self.color != Qt.green:
             self.color = Qt.green
+            for x in self.parent().habits:
+                if x['name'] == self.habit_name:
+                    x['days'][str(self.day.day())] = "green"
         else:
+            for x in self.parent().habits:
+                if x['name'] == self.habit_name:
+                    x['days'][str(self.day.day())] = "white"
+
             if datetime.datetime.today().day == self.day.day():
                 self.color = Qt.yellow
             elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
