@@ -4,6 +4,9 @@ import json
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QLineEdit
 from PyQt5.QtGui import QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QRect, QPoint, QSize, QDate
+import os
+# change dir to read json
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class HabitTracker(QWidget):
     def __init__(self):
@@ -56,10 +59,11 @@ class HabitTracker(QWidget):
             square = Square(day)
             if squares[i-1] == "green":
                 square.color = Qt.green
-            elif squares[i-1] == "yellow":
-                square.color = Qt.yellow
             else:
-                square.color = Qt.white
+                if datetime.datetime.today().day == day.day():
+                    square.color = Qt.yellow
+                else:
+                    square.color = Qt.white
             habit_squares.append(square)
             habit_row.addWidget(square)
 
@@ -82,13 +86,11 @@ class HabitTracker(QWidget):
             for square in habit_squares:
                 if square.color == Qt.green:
                     squares.append("green")
-                elif square.color == Qt.yellow:
-                    squares.append("yellow")
                 else:
                     squares.append("white")
             habits.append({"name": habit_name, "squares": squares})
         with open("habits.json", "w") as f:
-            json.dump(habits, f)
+            json.dump(habits, f, indent=4)
 
     def load_habits(self):
         try:
@@ -120,7 +122,10 @@ class Square(QWidget):
         if self.color == Qt.white or self.color == Qt.yellow:
             self.color = Qt.green
         else:
-            self.color = Qt.white
+            if datetime.datetime.today().day == self.day.day():
+                self.color = Qt.yellow
+            else:
+                self.color = Qt.white
         self.update()
         self.parent().save_habits()
 
