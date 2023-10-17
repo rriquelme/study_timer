@@ -1,4 +1,5 @@
 import sys
+import datetime
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton
 from PyQt5.QtGui import QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QRect, QPoint, QSize, QDate
@@ -53,7 +54,10 @@ class Square(QWidget):
     def __init__(self, day):
         super().__init__()
         self.day = day
-        self.color = Qt.white
+        if datetime.datetime.today().day == self.day.day():
+            self.color = Qt.yellow
+        else:
+            self.color = Qt.white
         self.setMinimumSize(QSize(20, 20))
         self.setMaximumSize(QSize(20, 20))
 
@@ -63,7 +67,7 @@ class Square(QWidget):
         painter.drawRect(QRect(QPoint(0, 0), QSize(20, 20)))
 
     def mousePressEvent(self, event):
-        if self.color == Qt.white:
+        if self.color == Qt.white or self.color == Qt.yellow:
             self.color = Qt.green
         else:
             self.color = Qt.white
