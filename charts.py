@@ -56,12 +56,15 @@ class HabitTracker(QWidget):
         habit_squares = []
         for i in range(1, 32):
             day = QDate(2023, 10, i)
+            #print(day.toString("ddd")[0])
             square = Square(day)
             if squares[i-1] == "green":
                 square.color = Qt.green
             else:
                 if datetime.datetime.today().day == day.day():
                     square.color = Qt.yellow
+                elif day.toString("ddd")[0] == 'd' or day.toString("ddd")[0] == 's':
+                    square.color = Qt.gray
                 else:
                     square.color = Qt.white
             habit_squares.append(square)
@@ -119,11 +122,13 @@ class Square(QWidget):
         painter.drawRect(QRect(QPoint(0, 0), QSize(20, 20)))
 
     def mousePressEvent(self, event):
-        if self.color == Qt.white or self.color == Qt.yellow:
+        if self.color != Qt.green:
             self.color = Qt.green
         else:
             if datetime.datetime.today().day == self.day.day():
                 self.color = Qt.yellow
+            elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
+                self.color = Qt.gray
             else:
                 self.color = Qt.white
         self.update()
