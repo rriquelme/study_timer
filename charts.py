@@ -6,6 +6,10 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLay
 from PyQt5.QtGui import QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QRect, QPoint, QSize, QDate
 import os
+
+custom_green = QColor(34, 177, 34)
+custom_yellow = QColor(255,201,14)
+custom_gray = QColor(153,217,234)
 # change dir to read json
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,12 +85,12 @@ class HabitTracker(QWidget):
         day = QDate(2023, 10, ndate)
         square = Square(day,habit_name)
         if color == "green":
-            square.color = Qt.green
+            square.color = custom_green
         else:
             if datetime.datetime.today().day == day.day():
-                square.color = Qt.yellow
+                square.color = custom_yellow
             elif day.toString("ddd")[0] == 'd' or day.toString("ddd")[0] == 's':
-                square.color = Qt.gray
+                square.color = custom_gray
             else:
                 square.color = Qt.white
         return square
@@ -193,7 +197,7 @@ class Square(QWidget):
         self.day = day
         self.habit_name = habit_name
         #if datetime.datetime.today().day == self.day.day():
-        #    self.color = Qt.yellow
+        #    self.color = custom_yellow
         #else:
         #    self.color = Qt.white
         self.setMinimumSize(QSize(20, 20))
@@ -205,8 +209,8 @@ class Square(QWidget):
         painter.drawRect(QRect(QPoint(0, 0), QSize(20, 20)))
 
     def mousePressEvent(self, event):
-        if self.color != Qt.green:
-            self.color = Qt.green
+        if self.color != custom_green:
+            self.color = custom_green
             for x in self.parent().habits:
                 if x['name'] == self.habit_name:
                     x['days'][str(self.day.day())] = "green"
@@ -216,9 +220,9 @@ class Square(QWidget):
                     x['days'][str(self.day.day())] = "white"
 
             if datetime.datetime.today().day == self.day.day():
-                self.color = Qt.yellow
+                self.color = custom_yellow
             elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
-                self.color = Qt.gray
+                self.color = custom_gray
             else:
                 self.color = Qt.white
         self.update()
