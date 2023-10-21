@@ -2,7 +2,7 @@ import sys
 import datetime
 import json
 import calendar
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QLineEdit, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtGui import QColor, QPainter, QBrush
 from PyQt5.QtCore import Qt, QRect, QPoint, QSize, QDate
 import os
@@ -29,6 +29,12 @@ class HabitTracker(QWidget):
         self.new_habit_button = QPushButton("New Habit")
         self.new_habit_button.clicked.connect(self.add_new_habit)
         button_row.addWidget(self.new_habit_button)
+        #button_row = QHBoxLayout()
+        #self.habit_input = QLineEdit()
+        #button_row.addWidget(self.habit_input)
+        self.sort_habits_button = QPushButton("Sort Habits")
+        self.sort_habits_button.clicked.connect(self.sort_habits)
+        button_row.addWidget(self.sort_habits_button)
 
 
         # Add the grid and button to the main layout
@@ -51,7 +57,7 @@ class HabitTracker(QWidget):
             day_label = QLabel(habit['name'])
             day_label.setAlignment(Qt.AlignVCenter)
             self.v0.addWidget(day_label)
-        self.hrows.addLayout(self.v0)
+        self.hrows.insertLayout(0,self.v0)
         
         # Then the days of the month
         self.vx = []
@@ -63,7 +69,7 @@ class HabitTracker(QWidget):
             self.vx[-1].addWidget(day_label)
             for habit in self.habits:
                 self.vx[-1].addWidget(self.to_square(habit['days'][str(i)],i,habit['name']))
-            self.hrows.addLayout(self.vx[-1])
+            self.hrows.insertLayout(i,self.vx[-1])
 
     def resize_ui(self,habit_name, days):
         self.v0.addWidget(QLabel(habit_name))
@@ -97,6 +103,75 @@ class HabitTracker(QWidget):
             self.habit_input.clear()
             self.save_habits()
             self.resize_ui(self.habits[-1]['name'],self.habits[-1]['days'])
+
+    def sort_habits(self):
+        # Create a new window to be able to sort habits
+        self.sort_window = QWidget()
+        self.sort_window.setWindowTitle("Sort Habits")
+        self.sort_window.resize(400, 200)
+        self.sort_window.setLayout(QVBoxLayout())
+        # Add the habits
+        self.sort_habits = QTreeWidget()
+        self.sort_habits.setDragDropMode(QTreeWidget.InternalMove)
+        self.sort_habits.setDragEnabled(True)
+        self.sort_habits.setDropIndicatorShown(True)
+        self.sort_habits.setDragDropOverwriteMode(False)
+        self.sort_habits.setDropIndicatorShown(True)
+        self.sort_habits.setColumnCount(1)
+        # Enable drag and drop on qtreewidget
+        self.sort_habits.setHeaderLabel('Habits')
+        for habit in self.habits:
+            item = QTreeWidgetItem(self.sort_habits, [habit['name']])
+            item.setFlags(item.flags() | Qt.ItemIsEditable)
+            #item.clicked.connect(lambda checked, x=habit['name']: self.delete_habit(x))
+        self.sort_window.layout().addWidget(self.sort_habits)
+        # Add the save button
+        apply_button = QPushButton("Apply")
+        apply_button.clicked.connect(self.apply_sort)
+        self.sort_window.layout().addWidget(apply_button)
+        self.sort_window.show()
+
+    def apply_sort(self):
+        # print the new order of the habits
+        if self.sort_habits.topLevelItemCount() == len(self.habits):
+            temp_sorting_array = [ self.sort_habits.topLevelItem(x).text(0) for x in range(self.sort_habits.topLevelItemCount() ) ]
+            temp_list = []
+            for x in temp_sorting_array:
+                for y in self.habits:
+                    if x == y['name']:
+                        temp_list.append(y)
+                        break
+            # for x in temp_sorting_array:
+            #    temp_dict[x] = self.habits[x]
+            # print("----")
+            # print(temp_list)
+            self.habits = temp_list
+            self.save_habits()
+            self.refresh_ui()
+    
+    # Create a function to refresh the ui
+    def refresh_ui(self):
+        # Clear the ui
+        # print(self.hrows.count())
+        for i in range(self.hrows.count()):
+            for x in range(len(self.habits)+1):
+                if self.hrows.itemAt(i).itemAt(x) != None:
+                    self.hrows.itemAt(i).itemAt(x).widget().hide()
+                    self.hrows.itemAt(i).itemAt(x).widget().setParent(None)
+                    self.hrows.itemAt(i).itemAt(x).widget().deleteLater()
+            self.hrows.itemAt(i).deleteLater()
+
+            #try:
+            #    #if i == 1:
+            #    #    continue
+            #    print(self.hrows.itemAt(i).itemAt(1).widget().hide())
+            #    print(i)
+            #except:
+            #    pass
+        
+
+        # Recreate the ui
+        self.create_ui()
 
     def save_habits(self):
         with open("habits.json", "w") as f:
