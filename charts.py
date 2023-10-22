@@ -10,6 +10,7 @@ import os
 custom_green = QColor(34, 177, 34)
 custom_yellow = QColor(255,201,14)
 custom_gray = QColor(153,217,234)
+custom_future = QColor(141,219,124)
 # change dir to read json
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -82,10 +83,14 @@ class HabitTracker(QWidget):
             self.vx[x-1].addWidget(self.to_square(days[x],x,habit_name))
 
     def to_square(self, color,ndate,habit_name):
-        day = QDate(2023, 10, ndate)
+        now = datetime.datetime.now()
+        day = QDate(now.year, now.month, ndate)
+        square_date = datetime.datetime(now.year, now.month, ndate)
         square = Square(day,habit_name)
-        if color == "green":
+        if color == "Done":
             square.color = custom_green
+        elif color == "Future":
+            square.color = custom_future
         else:
             if datetime.datetime.today().day == day.day():
                 square.color = custom_yellow
@@ -102,7 +107,7 @@ class HabitTracker(QWidget):
             now = datetime.datetime.now()
             len_month = calendar.monthrange(now.year, now.month)[1]
             for x in range(1,len_month+1):
-                d[x] = "white"
+                d[x] = "-"
             self.habits.append({"name": habit_name, "days": d})
             self.habit_input.clear()
             self.save_habits()
@@ -209,15 +214,63 @@ class Square(QWidget):
         painter.drawRect(QRect(QPoint(0, 0), QSize(20, 20)))
 
     def mousePressEvent(self, event):
-        if self.color != custom_green:
-            self.color = custom_green
+        #print(self.habit_name, self.day.day())
+        aux = "Done"
+        for x in self.parent().habits:
+                if x['name'] == self.habit_name:
+                    aux = x['days'][str(self.day.day())]
+                    break
+        now = datetime.datetime.now()
+        if self.day.day() == now.day:
+            # print("here")
+            if aux == "Done":
+                aux = "Future"
+                self.color = custom_future
+            elif aux == "Future":
+                aux = "-"
+                if datetime.datetime.today().day == self.day.day():
+                    self.color = custom_yellow
+                elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
+                    self.color = custom_gray
+                else:
+                    self.color = Qt.white   
+            elif aux == "-":
+                aux = "Done"
+                self.color = custom_green
             for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    x['days'][str(self.day.day())] = "green"
-        else:
+                    x['days'][str(self.day.day())] = aux
+        elif aux == "Future":
             for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    x['days'][str(self.day.day())] = "white"
+                    x['days'][str(self.day.day())] = "-"
+
+            if datetime.datetime.today().day == self.day.day():
+                self.color = custom_yellow
+            elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
+                self.color = custom_gray
+            else:
+                self.color = Qt.white
+        elif aux == "-":
+            now = datetime.datetime.now()
+            #day = QDate(now.year, now.month, ndate)
+            square_date = datetime.datetime(now.year, now.month, self.day.day())
+            #square = Square(day,habit_name)
+            if now < square_date:
+                for x in self.parent().habits:
+                    if x['name'] == self.habit_name:
+                        x['days'][str(self.day.day())] = "Future"
+                self.color = custom_future
+            else:
+                self.color = custom_green
+                for x in self.parent().habits:
+                    if x['name'] == self.habit_name:
+                        x['days'][str(self.day.day())] = "Done"
+            #self.color = custom_green
+        elif aux == "Done":
+            for x in self.parent().habits:
+                if x['name'] == self.habit_name:
+                    x['days'][str(self.day.day())] = "-"
 
             if datetime.datetime.today().day == self.day.day():
                 self.color = custom_yellow
