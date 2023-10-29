@@ -19,24 +19,20 @@ class HabitTracker(QWidget):
         super().__init__()
         self.setWindowTitle("Habit Tracker")
         self.initUI()
-
+    
+    def d_to_s(self, d):
+        return d.toString("yyyy-MM-dd")
+    
     def initUI(self):
         # Create a header row with the days of the month for October
         self.hrows = QHBoxLayout()
-        #self.setLayout(self.hrows)
-        # First will be the header for the habits
-        # Create a new row for the button and habit input
         self.create_ui()
-        #self.create_ui()
         button_row = QHBoxLayout()
         self.habit_input = QLineEdit()
         button_row.addWidget(self.habit_input)
         self.new_habit_button = QPushButton("New Habit")
         self.new_habit_button.clicked.connect(self.add_new_habit)
         button_row.addWidget(self.new_habit_button)
-        #button_row = QHBoxLayout()
-        #self.habit_input = QLineEdit()
-        #button_row.addWidget(self.habit_input)
         self.sort_habits_button = QPushButton("Sort Habits")
         self.sort_habits_button.clicked.connect(self.sort_habits)
         button_row.addWidget(self.sort_habits_button)
@@ -50,7 +46,6 @@ class HabitTracker(QWidget):
 
 
     def create_ui(self):
-        #self.hrows = QHBoxLayout()
         self.load_habits()
         now = datetime.datetime.now()
         len_month = calendar.monthrange(now.year, now.month)[1]
@@ -64,22 +59,20 @@ class HabitTracker(QWidget):
             self.v0.addWidget(day_label)
         self.hrows.insertLayout(0,self.v0)
         
-        # Then the days of the month
         self.vx = []
         for i in range(1, len_month+1):
-            #vx = QVBoxLayout()
             self.vx.append(QVBoxLayout())
             day = QDate(now.year, now.month, i)
             day_label = QLabel(str(i))#+"|"+day.toString("ddd")[0])
             self.vx[-1].addWidget(day_label)
             for habit in self.habits:
-                self.vx[-1].addWidget(self.to_square(habit['days'][str(i)],i,habit['name']))
+                self.vx[-1].addWidget(self.to_square(habit['days'][self.d_to_s(day)],i,habit['name']))
             self.hrows.insertLayout(i,self.vx[-1])
-
+        
     def resize_ui(self,habit_name, days):
         self.v0.addWidget(QLabel(habit_name))
         for x in range(1, len(self.vx)+1):
-            #print("---",days[1])
+            #needs fixing
             self.vx[x-1].addWidget(self.to_square(days[x],x,habit_name))
 
     def to_square(self, color,ndate,habit_name):
@@ -107,6 +100,7 @@ class HabitTracker(QWidget):
             now = datetime.datetime.now()
             len_month = calendar.monthrange(now.year, now.month)[1]
             for x in range(1,len_month+1):
+                # needs fixing
                 d[x] = "-"
             self.habits.append({"name": habit_name, "days": d})
             self.habit_input.clear()
@@ -132,7 +126,6 @@ class HabitTracker(QWidget):
         for habit in self.habits:
             item = QTreeWidgetItem(self.sort_habits, [habit['name']])
             item.setFlags(item.flags() | Qt.ItemIsEditable)
-            #item.clicked.connect(lambda checked, x=habit['name']: self.delete_habit(x))
         self.sort_window.layout().addWidget(self.sort_habits)
         # Add the save button
         apply_button = QPushButton("Apply")
@@ -150,10 +143,6 @@ class HabitTracker(QWidget):
                     if x == y['name']:
                         temp_list.append(y)
                         break
-            # for x in temp_sorting_array:
-            #    temp_dict[x] = self.habits[x]
-            # print("----")
-            # print(temp_list)
             self.habits = temp_list
             self.save_habits()
             self.refresh_ui()
@@ -161,7 +150,6 @@ class HabitTracker(QWidget):
     # Create a function to refresh the ui
     def refresh_ui(self):
         # Clear the ui
-        # print(self.hrows.count())
         for i in range(self.hrows.count()):
             for x in range(len(self.habits)+1):
                 if self.hrows.itemAt(i).itemAt(x) != None:
@@ -170,26 +158,21 @@ class HabitTracker(QWidget):
                     self.hrows.itemAt(i).itemAt(x).widget().deleteLater()
             self.hrows.itemAt(i).deleteLater()
 
-            #try:
-            #    #if i == 1:
-            #    #    continue
-            #    print(self.hrows.itemAt(i).itemAt(1).widget().hide())
-            #    print(i)
-            #except:
-            #    pass
-        
-
         # Recreate the ui
         self.create_ui()
 
     def save_habits(self):
         with open("habits.json", "w") as f:
-            json.dump(self.habits, f, indent=4)
+            d = {}
+            d['config'] = {}
+            d['habits'] = self.habits
+            json.dump(d, f, indent=4)
 
     def load_habits(self):
         try:
             with open("habits.json", "r") as f:
-                self.habits = json.load(f)
+                d = json.load(f)
+                self.habits = d.get('habits', [])
         except FileNotFoundError:
             self.habits = []
 
@@ -201,10 +184,6 @@ class Square(QWidget):
         super().__init__()
         self.day = day
         self.habit_name = habit_name
-        #if datetime.datetime.today().day == self.day.day():
-        #    self.color = custom_yellow
-        #else:
-        #    self.color = Qt.white
         self.setMinimumSize(QSize(20, 20))
         self.setMaximumSize(QSize(20, 20))
 
@@ -214,15 +193,13 @@ class Square(QWidget):
         painter.drawRect(QRect(QPoint(0, 0), QSize(20, 20)))
 
     def mousePressEvent(self, event):
-        #print(self.habit_name, self.day.day())
         aux = "Done"
         for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    aux = x['days'][str(self.day.day())]
+                    aux = x['days'][self.parent().d_to_s(self.day)]
                     break
         now = datetime.datetime.now()
         if self.day.day() == now.day:
-            # print("here")
             if aux == "Done":
                 aux = "Future"
                 self.color = custom_future
@@ -239,11 +216,11 @@ class Square(QWidget):
                 self.color = custom_green
             for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    x['days'][str(self.day.day())] = aux
+                    x['days'][self.parent().d_to_s(self.day)] = aux
         elif aux == "Future":
             for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    x['days'][str(self.day.day())] = "-"
+                    x['days'][self.parent().d_to_s(self.day)] = "-"
 
             if datetime.datetime.today().day == self.day.day():
                 self.color = custom_yellow
@@ -253,24 +230,22 @@ class Square(QWidget):
                 self.color = Qt.white
         elif aux == "-":
             now = datetime.datetime.now()
-            #day = QDate(now.year, now.month, ndate)
             square_date = datetime.datetime(now.year, now.month, self.day.day())
-            #square = Square(day,habit_name)
             if now < square_date:
                 for x in self.parent().habits:
                     if x['name'] == self.habit_name:
-                        x['days'][str(self.day.day())] = "Future"
+                        x['days'][self.parent().d_to_s(self.day)] = "Future"
                 self.color = custom_future
             else:
                 self.color = custom_green
                 for x in self.parent().habits:
                     if x['name'] == self.habit_name:
-                        x['days'][str(self.day.day())] = "Done"
+                        x['days'][self.parent().d_to_s(self.day)] = "Done"
             #self.color = custom_green
         elif aux == "Done":
             for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    x['days'][str(self.day.day())] = "-"
+                    x['days'][self.parent().d_to_s(self.day)] = "-"
 
             if datetime.datetime.today().day == self.day.day():
                 self.color = custom_yellow

@@ -1,4 +1,4 @@
 saved_times.txt
 time.txt
 __pycache__/*
-habits.json
+*.json
