@@ -78,9 +78,13 @@ class HabitTracker(QWidget):
 
     def resize_ui(self,habit_name, days):
         self.v0.addWidget(QLabel(habit_name))
-        for x in range(1, len(self.vx)+1):
+        counter = 0
+        for x in range(self.minus_days, self.plus_days):
+        #for x in range(1, len(self.vx)+1):
             #needs fixing
-            self.vx[x-1].addWidget(self.to_square(days[x],x,habit_name))
+            day = QDate.currentDate().addDays(x)
+            self.vx[counter].addWidget(self.to_square(days.get(self.d_to_s(day),'-'),day,habit_name))
+            counter += 1
 
     def to_square(self, color,nday,habit_name):
         now = datetime.datetime.now()
@@ -104,11 +108,11 @@ class HabitTracker(QWidget):
         habit_name = self.habit_input.text()
         if habit_name:
             d = {}
-            now = datetime.datetime.now()
-            len_month = calendar.monthrange(now.year, now.month)[1]
-            for x in range(1,len_month+1):
-                # needs fixing
-                d[x] = "-"
+            #now = datetime.datetime.now()
+            #len_month = calendar.monthrange(now.year, now.month)[1]
+            #for x in range(1,len_month+1):
+            #    # needs fixing
+            #    d[x] = "-"
             self.habits.append({"name": habit_name, "days": d})
             self.habit_input.clear()
             self.save_habits()
