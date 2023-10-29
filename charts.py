@@ -19,6 +19,8 @@ class HabitTracker(QWidget):
         super().__init__()
         self.setWindowTitle("Habit Tracker")
         self.initUI()
+        self.minus_days = -30
+        self.plus_days = 20
     
     def d_to_s(self, d):
         return d.toString("yyyy-MM-dd")
@@ -46,9 +48,10 @@ class HabitTracker(QWidget):
 
 
     def create_ui(self):
+        self.minus_days = -30
+        self.plus_days = 20
         self.load_habits()
         now = datetime.datetime.now()
-        len_month = calendar.monthrange(now.year, now.month)[1]
         self.v0 = QVBoxLayout()
         day_label = QLabel("Habits:")
         day_label.setAlignment(Qt.AlignVCenter)
@@ -60,32 +63,36 @@ class HabitTracker(QWidget):
         self.hrows.insertLayout(0,self.v0)
         
         self.vx = []
-        for i in range(1, len_month+1):
+        len_month = calendar.monthrange(now.year, now.month)[1]
+        # create days from self.minus_days to self.plus_days
+        counter = 1
+        for i in range(self.minus_days, self.plus_days):
             self.vx.append(QVBoxLayout())
-            day = QDate(now.year, now.month, i)
-            day_label = QLabel(str(i))#+"|"+day.toString("ddd")[0])
+            day = QDate(now.year, now.month, now.day).addDays(i)
+            day_label = QLabel(str(day.day()))
             self.vx[-1].addWidget(day_label)
             for habit in self.habits:
-                self.vx[-1].addWidget(self.to_square(habit['days'][self.d_to_s(day)],i,habit['name']))
-            self.hrows.insertLayout(i,self.vx[-1])
-        
+                self.vx[-1].addWidget(self.to_square(habit['days'].get(self.d_to_s(day),'-'),day,habit['name']))
+            self.hrows.insertLayout(counter,self.vx[-1])
+            counter += 1
+
     def resize_ui(self,habit_name, days):
         self.v0.addWidget(QLabel(habit_name))
         for x in range(1, len(self.vx)+1):
             #needs fixing
             self.vx[x-1].addWidget(self.to_square(days[x],x,habit_name))
 
-    def to_square(self, color,ndate,habit_name):
+    def to_square(self, color,nday,habit_name):
         now = datetime.datetime.now()
-        day = QDate(now.year, now.month, ndate)
-        square_date = datetime.datetime(now.year, now.month, ndate)
+        day = nday
+        #square_date = datetime.datetime(now.year, now.month, ndate)
         square = Square(day,habit_name)
         if color == "Done":
             square.color = custom_green
         elif color == "Future":
             square.color = custom_future
         else:
-            if datetime.datetime.today().day == day.day():
+            if QDate.currentDate() == day:
                 square.color = custom_yellow
             elif day.toString("ddd")[0] == 'd' or day.toString("ddd")[0] == 's':
                 square.color = custom_gray
@@ -196,16 +203,17 @@ class Square(QWidget):
         aux = "Done"
         for x in self.parent().habits:
                 if x['name'] == self.habit_name:
-                    aux = x['days'][self.parent().d_to_s(self.day)]
+                    aux = x['days'].get(self.parent().d_to_s(self.day),'-')#[self.parent().d_to_s(self.day)]
                     break
-        now = datetime.datetime.now()
-        if self.day.day() == now.day:
+        # now = datetime.datetime.now()
+        today = QDate.currentDate()
+        if self.day == today:
             if aux == "Done":
                 aux = "Future"
                 self.color = custom_future
             elif aux == "Future":
                 aux = "-"
-                if datetime.datetime.today().day == self.day.day():
+                if today == self.day:
                     self.color = custom_yellow
                 elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
                     self.color = custom_gray
@@ -222,16 +230,17 @@ class Square(QWidget):
                 if x['name'] == self.habit_name:
                     x['days'][self.parent().d_to_s(self.day)] = "-"
 
-            if datetime.datetime.today().day == self.day.day():
+            if today == self.day:
                 self.color = custom_yellow
             elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
                 self.color = custom_gray
             else:
                 self.color = Qt.white
         elif aux == "-":
-            now = datetime.datetime.now()
-            square_date = datetime.datetime(now.year, now.month, self.day.day())
-            if now < square_date:
+            # now = datetime.datetime.now()
+
+            #square_date = datetime.datetime(now.year, now.month, self.day.day())
+            if today < self.day:
                 for x in self.parent().habits:
                     if x['name'] == self.habit_name:
                         x['days'][self.parent().d_to_s(self.day)] = "Future"
@@ -247,7 +256,7 @@ class Square(QWidget):
                 if x['name'] == self.habit_name:
                     x['days'][self.parent().d_to_s(self.day)] = "-"
 
-            if datetime.datetime.today().day == self.day.day():
+            if today == self.day:
                 self.color = custom_yellow
             elif self.day.toString("ddd")[0] == 'd' or self.day.toString("ddd")[0] == 's':
                 self.color = custom_gray
