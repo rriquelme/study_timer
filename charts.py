@@ -21,6 +21,7 @@ class HabitTracker(QWidget):
         self.initUI()
         self.minus_days = -30
         self.plus_days = 20
+        self.setGeometry(100, 200, 100, 100)
     
     def d_to_s(self, d):
         return d.toString("yyyy-MM-dd")
@@ -69,7 +70,10 @@ class HabitTracker(QWidget):
         for i in range(self.minus_days, self.plus_days):
             self.vx.append(QVBoxLayout())
             day = QDate(now.year, now.month, now.day).addDays(i)
-            day_label = QLabel(str(day.day()))
+            if day.day() == 1:
+                day_label = QLabel(str(day.day())+"|"+str(day.month()))
+            else:
+                day_label = QLabel(str(day.day()))
             self.vx[-1].addWidget(day_label)
             for habit in self.habits:
                 self.vx[-1].addWidget(self.to_square(habit['days'].get(self.d_to_s(day),'-'),day,habit['name']))
