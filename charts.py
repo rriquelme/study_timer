@@ -39,6 +39,9 @@ class HabitTracker(QWidget):
         self.sort_habits_button = QPushButton("Sort Habits")
         self.sort_habits_button.clicked.connect(self.sort_habits)
         button_row.addWidget(self.sort_habits_button)
+        self.config_button = QPushButton("Config")
+        self.config_button.clicked.connect(self.config)
+        button_row.addWidget(self.config_button)
 
 
         # Add the grid and button to the main layout
@@ -47,7 +50,9 @@ class HabitTracker(QWidget):
         main_layout.addLayout(button_row)
         self.setLayout(main_layout)
 
-
+    def config(self):
+        pass
+    
     def create_ui(self):
         self.minus_days = -30
         self.plus_days = 20
