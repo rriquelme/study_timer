@@ -51,6 +51,40 @@ class HabitTracker(QWidget):
         self.setLayout(main_layout)
 
     def config(self):
+        # create a new windows to configure the app
+        self.config_window = QWidget()
+        self.config_window.setWindowTitle("Config")
+        self.config_window.resize(400, 200)
+        self.config_window.setLayout(QVBoxLayout())
+        # Add the config options
+        self.config_options = QTreeWidget()
+        self.config_options.setColumnCount(2)
+        self.config_options.setHeaderLabels(["Option", "Value"])
+        # Add the option to change the number of days to show
+        self.config_days_past = QTreeWidgetItem(self.config_options, ["Days to show for the pas", str(self.minus_days)])
+        self.config_days_past.setFlags(self.config_days_past.flags() | Qt.ItemIsEditable)
+        self.config_days_future = QTreeWidgetItem(self.config_options, ["Days to show for the future", str(self.plus_days)])
+        self.config_days_future.setFlags(self.config_days_future.flags() | Qt.ItemIsEditable)
+        
+        self.config_window.layout().addWidget(self.config_options)
+        # Add the save button
+        apply_button = QPushButton("Apply")
+        apply_button.clicked.connect(self.apply_config)
+        self.config_window.layout().addWidget(apply_button)
+        #Add button restore default
+        restore_button = QPushButton("Restore default")
+        restore_button.clicked.connect(self.restore_default)
+        self.config_window.layout().addWidget(restore_button)
+        #add the cancel button
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(self.config_window.close)
+        self.config_window.layout().addWidget(cancel_button)
+        # show the window
+
+        self.config_window.show()
+    def restore_default(self):
+        pass
+    def apply_config(self):
         pass
     
     def create_ui(self):
