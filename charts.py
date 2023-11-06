@@ -13,11 +13,11 @@ custom_gray = QColor(153,217,234)
 custom_future = QColor(141,219,124)
 # change dir to read json
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 class HabitTracker(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Habit Tracker")
+        title_date = datetime.datetime.now().strftime("%A, %d %B %Y")   
+        self.setWindowTitle("Habit Tracker: "+ title_date)
         self.initUI()
         self.minus_days = -30
         self.plus_days = 20
@@ -113,6 +113,7 @@ class HabitTracker(QWidget):
                 day_label = QLabel(str(day.day())+"|"+str(day.month()))
             else:
                 day_label = QLabel(str(day.day()))
+            day_label.setAlignment(Qt.AlignCenter)
             self.vx[-1].addWidget(day_label)
             for habit in self.habits:
                 self.vx[-1].addWidget(self.to_square(habit['days'].get(self.d_to_s(day),'-'),day,habit['name']))
