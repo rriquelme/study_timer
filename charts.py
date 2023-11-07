@@ -59,12 +59,10 @@ class HabitTracker(QWidget):
         # Add the config options
         self.config_options = QTreeWidget()
         self.config_options.setColumnCount(2)
-        self.config_options.setHeaderLabels(["Option", "Value"])
+        self.config_options.setColumnWidth(0, 200)
+        self.config_options.setHeaderLabels(["Option / Description", "Value"])
         # Add the option to change the number of days to show
-        self.config_days_past = QTreeWidgetItem(self.config_options, ["Days to show for the pas", str(self.minus_days)])
-        self.config_days_past.setFlags(self.config_days_past.flags() | Qt.ItemIsEditable)
-        self.config_days_future = QTreeWidgetItem(self.config_options, ["Days to show for the future", str(self.plus_days)])
-        self.config_days_future.setFlags(self.config_days_future.flags() | Qt.ItemIsEditable)
+        self.load_config()
         
         self.config_window.layout().addWidget(self.config_options)
         # Add the save button
@@ -82,8 +80,17 @@ class HabitTracker(QWidget):
         # show the window
 
         self.config_window.show()
+
+    def load_config(self):
+        self.config_options.clear()
+        self.config_days_past = QTreeWidgetItem(self.config_options, ["Days to show for the pas", str(self.minus_days)])
+        self.config_days_past.setFlags(self.config_days_past.flags() | Qt.ItemIsEditable)
+        self.config_days_future = QTreeWidgetItem(self.config_options, ["Days to show for the future", str(self.plus_days)])
+        self.config_days_future.setFlags(self.config_days_future.flags() | Qt.ItemIsEditable)
+
     def restore_default(self):
-        pass
+        self.load_config()
+
     def apply_config(self):
         pass
     
