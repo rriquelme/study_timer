@@ -92,7 +92,9 @@ class HabitTracker(QWidget):
         self.load_config()
 
     def apply_config(self):
-        pass
+        #get text from self.config days past and future
+        self.minus_days = int(self.config_days_past.text(1))
+        self.plus_days = int(self.config_days_future.text(1))
     
     def create_ui(self):
         self.minus_days = -30
