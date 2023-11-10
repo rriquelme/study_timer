@@ -16,11 +16,11 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class HabitTracker(QWidget):
     def __init__(self):
         super().__init__()
+        self.minus_days = -30
+        self.plus_days = 20
         title_date = datetime.datetime.now().strftime("%A, %d %B %Y")   
         self.setWindowTitle("Habit Tracker: "+ title_date)
         self.initUI()
-        self.minus_days = -30
-        self.plus_days = 20
         self.setGeometry(100, 200, 100, 100)
     
     def d_to_s(self, d):
@@ -95,10 +95,12 @@ class HabitTracker(QWidget):
         #get text from self.config days past and future
         self.minus_days = int(self.config_days_past.text(1))
         self.plus_days = int(self.config_days_future.text(1))
+        # refresh the ui
+        self.refresh_ui()
     
     def create_ui(self):
-        self.minus_days = -30
-        self.plus_days = 20
+        #self.minus_days = -30
+        #self.plus_days = 30
         self.load_habits()
         now = datetime.datetime.now()
         self.v0 = QVBoxLayout()
@@ -219,6 +221,7 @@ class HabitTracker(QWidget):
                 if self.hrows.itemAt(i).itemAt(x) != None:
                     self.hrows.itemAt(i).itemAt(x).widget().hide()
                     self.hrows.itemAt(i).itemAt(x).widget().setParent(None)
+                if self.hrows.itemAt(i).itemAt(x) != None:
                     self.hrows.itemAt(i).itemAt(x).widget().deleteLater()
             self.hrows.itemAt(i).deleteLater()
 
