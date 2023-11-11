@@ -16,8 +16,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class HabitTracker(QWidget):
     def __init__(self):
         super().__init__()
-        self.minus_days = -30
-        self.plus_days = 20
+        #self.minus_days = -30
+        #self.plus_days = 20
         title_date = datetime.datetime.now().strftime("%A, %d %B %Y")   
         self.setWindowTitle("Habit Tracker: "+ title_date)
         self.initUI()
@@ -99,8 +99,6 @@ class HabitTracker(QWidget):
         self.refresh_ui()
     
     def create_ui(self):
-        #self.minus_days = -30
-        #self.plus_days = 30
         self.load_habits()
         now = datetime.datetime.now()
         self.v0 = QVBoxLayout()
@@ -144,7 +142,6 @@ class HabitTracker(QWidget):
     def to_square(self, color,nday,habit_name):
         now = datetime.datetime.now()
         day = nday
-        #square_date = datetime.datetime(now.year, now.month, ndate)
         square = Square(day,habit_name)
         if color == "Done":
             square.color = custom_green
@@ -163,11 +160,6 @@ class HabitTracker(QWidget):
         habit_name = self.habit_input.text()
         if habit_name:
             d = {}
-            #now = datetime.datetime.now()
-            #len_month = calendar.monthrange(now.year, now.month)[1]
-            #for x in range(1,len_month+1):
-            #    # needs fixing
-            #    d[x] = "-"
             self.habits.append({"name": habit_name, "days": d})
             self.habit_input.clear()
             self.save_habits()
@@ -232,6 +224,8 @@ class HabitTracker(QWidget):
         with open("habits.json", "w") as f:
             d = {}
             d['config'] = {}
+            d['config']['plus_days'] = self.plus_days
+            d['config']['minus_days'] = self.minus_days
             d['habits'] = self.habits
             json.dump(d, f, indent=4)
 
@@ -239,6 +233,8 @@ class HabitTracker(QWidget):
         try:
             with open("habits.json", "r") as f:
                 d = json.load(f)
+                self.plus_days = d['config'].get('plus_days', 20)
+                self.minus_days = d['config'].get('minus_days', -30)
                 self.habits = d.get('habits', [])
         except FileNotFoundError:
             self.habits = []
