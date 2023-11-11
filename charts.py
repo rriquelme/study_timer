@@ -95,6 +95,7 @@ class HabitTracker(QWidget):
         #get text from self.config days past and future
         self.minus_days = int(self.config_days_past.text(1))
         self.plus_days = int(self.config_days_future.text(1))
+        self.save_habits()
         # refresh the ui
         self.refresh_ui()
     
