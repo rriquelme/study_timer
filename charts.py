@@ -96,6 +96,11 @@ class HabitTracker(QWidget):
         self.minus_days = int(self.config_days_past.text(1))
         self.plus_days = int(self.config_days_future.text(1))
         self.save_habits()
+        # # close the main window
+        # self.close()
+        # # create a new window
+        # self.__init__()
+        
         # refresh the ui
         self.refresh_ui()
     
@@ -133,6 +138,7 @@ class HabitTracker(QWidget):
     def resize_ui(self,habit_name, days):
         self.v0.addWidget(QLabel(habit_name))
         counter = 0
+        #self.resize(100, 100)
         for x in range(self.minus_days, self.plus_days):
         #for x in range(1, len(self.vx)+1):
             #needs fixing
@@ -217,9 +223,11 @@ class HabitTracker(QWidget):
                 if self.hrows.itemAt(i).itemAt(x) != None:
                     self.hrows.itemAt(i).itemAt(x).widget().deleteLater()
             self.hrows.itemAt(i).deleteLater()
+        #self.resize(100, 100)
 
         # Recreate the ui
         self.create_ui()
+        #self.setFixedSize(self.layout.sizeHint())
 
     def save_habits(self):
         with open("habits.json", "w") as f:
