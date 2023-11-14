@@ -29,6 +29,9 @@ class HabitTracker(QWidget):
     def initUI(self):
         # Create a header row with the days of the month for October
         self.hrows = QHBoxLayout()
+        # create new buttons on top to see a overview of the month
+        # to be implemented later
+        # create a summary window
         self.create_ui()
         button_row = QHBoxLayout()
         self.habit_input = QLineEdit()
